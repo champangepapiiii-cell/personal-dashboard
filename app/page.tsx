@@ -1,65 +1,64 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useMemo } from "react";
+import { DailyFocus } from "@/components/today/DailyFocus";
+import { StreakCard } from "@/components/today/StreakCard";
+import { WeeklyRing } from "@/components/today/WeeklyRing";
+import { computeStreaks, weeklyCompletion } from "@/lib/metrics";
+import { useStore } from "@/lib/store-context";
+
+// Icons (24x24 path data).
+const ICON_TRAINED =
+  "M6.5 6.5l11 11M4 12l1.5 1.5M12 4l1.5 1.5m4.5 12.5L19.5 20M20 12l-1.5-1.5M12 20l-1.5-1.5M8 8L4.5 4.5M16 16l3.5 3.5";
+const ICON_COOKED =
+  "M12 3c-3.5 0-6 2.5-6 6 0 2.5 1.5 4.2 3 5v3a1 1 0 001 1h4a1 1 0 001-1v-3c1.5-.8 3-2.5 3-5 0-3.5-2.5-6-6-6z";
+const ICON_CREATED =
+  "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z";
+const ICON_BUDGET =
+  "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 8c1.11 0 2.08.402 2.599 1";
+
+export default function TodayPage() {
+  const { data, hydrated } = useStore();
+
+  const streaks = useMemo(() => computeStreaks(data), [data]);
+  const completion = useMemo(() => weeklyCompletion(data), [data]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="mx-auto max-w-5xl space-y-4 md:space-y-5">
+      <DailyFocus />
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StreakCard
+          label="Days trained"
+          days={streaks.trained}
+          accent="var(--body)"
+          icon={ICON_TRAINED}
+          ready={hydrated}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <StreakCard
+          label="Days cooked at home"
+          days={streaks.cooked}
+          accent="var(--life)"
+          icon={ICON_COOKED}
+          ready={hydrated}
+        />
+        <StreakCard
+          label="Days created something"
+          days={streaks.created}
+          accent="var(--create)"
+          icon={ICON_CREATED}
+          ready={hydrated}
+        />
+        <StreakCard
+          label="Days under spend target"
+          days={streaks.underSpend}
+          accent="var(--money)"
+          icon={ICON_BUDGET}
+          ready={hydrated}
+        />
+      </div>
+
+      <WeeklyRing completion={completion} ready={hydrated} />
     </div>
   );
 }
