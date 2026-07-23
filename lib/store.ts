@@ -2,7 +2,13 @@
 // and writes through these typed functions. Handles JSON serialisation, safe
 // defaults, first-load seeding, and change notification.
 
-import { emptyData, generateSeedData } from "./seed";
+import { newId } from "./id";
+import {
+  DEFAULT_INVESTMENTS,
+  DEFAULT_RECURRING,
+  emptyData,
+  generateSeedData,
+} from "./seed";
 import type {
   AppData,
   EntryCollection,
@@ -33,6 +39,16 @@ function normalise(parsed: Partial<AppData> | null | undefined): AppData {
     goals: { ...base.goals, ...parsed.goals },
     habits: parsed.habits ?? base.habits,
     focuses: parsed.focuses ?? base.focuses,
+    // Fields added in Phase 3: when truly absent (pre-Phase-3 data), fall back
+    // to rich defaults so the Money views populate. A deliberately cleared
+    // dataset keeps its empty arrays.
+    investments: parsed.investments ?? DEFAULT_INVESTMENTS.map((x) => ({ ...x })),
+    recurring: parsed.recurring ?? DEFAULT_RECURRING.map((x) => ({ ...x })),
+    // Coach fields (added later): merge profile so new keys get defaults.
+    profile: { ...base.profile, ...parsed.profile },
+    mealPlan: parsed.mealPlan ?? base.mealPlan,
+    savingsPlan: parsed.savingsPlan ?? base.savingsPlan,
+    seenAchievements: parsed.seenAchievements ?? base.seenAchievements,
   };
 }
 
@@ -115,6 +131,27 @@ export function setHabits(habits: Habit[]): void {
   persist({ ...getData(), habits });
 }
 
+/** Set a habit's completion for a given day, creating the entry if needed. */
+export function setHabitCompletion(
+  habitId: string,
+  dateKey: string,
+  completed: boolean,
+): void {
+  const data = getData();
+  const existing = data.habitEntries.find(
+    (h) => h.habitId === habitId && h.date === dateKey,
+  );
+  const habitEntries = existing
+    ? data.habitEntries.map((h) =>
+        h === existing ? { ...h, completed } : h,
+      )
+    : [
+        ...data.habitEntries,
+        { id: newId("h"), habitId, date: dateKey, completed },
+      ];
+  persist({ ...data, habitEntries });
+}
+
 // --- Daily focus ------------------------------------------------------------
 
 export function getFocus(dateKey: string): string {
@@ -128,6 +165,26 @@ export function setFocus(dateKey: string, text: string): void {
   if (trimmed) focuses[dateKey] = trimmed;
   else delete focuses[dateKey];
   persist({ ...data, focuses });
+}
+
+// --- Coach: profile, plans, achievements -----------------------------------
+
+export function setProfile(profile: AppData["profile"]): void {
+  persist({ ...getData(), profile });
+}
+
+export function setMealPlan(mealPlan: AppData["mealPlan"]): void {
+  persist({ ...getData(), mealPlan });
+}
+
+export function setSavingsPlan(savingsPlan: AppData["savingsPlan"]): void {
+  persist({ ...getData(), savingsPlan });
+}
+
+export function markAchievementsSeen(ids: string[]): void {
+  const data = getData();
+  const merged = Array.from(new Set([...data.seenAchievements, ...ids]));
+  persist({ ...data, seenAchievements: merged });
 }
 
 // --- Bulk lifecycle (wired to Settings buttons) ----------------------------

@@ -1,18 +1,30 @@
 "use client";
 
-// Quick-add entry point. The capture flow arrives in a later phase — for now
-// this is a wired, styled affordance that acknowledges the click.
+// Opens the interactive Quick Add modal and shows a brief confirmation toast
+// when an entry is saved.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { QuickAddModal } from "./QuickAddModal";
 
 export function QuickAddButton() {
   const [open, setOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2600);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   return (
-    <div className="relative">
+    <>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(true)}
         className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-fg shadow-sm transition-opacity hover:opacity-90"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-4 w-4" aria-hidden="true">
@@ -21,24 +33,30 @@ export function QuickAddButton() {
         <span className="hidden sm:inline">Quick add</span>
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          className="absolute right-0 top-full z-40 mt-2 w-60 rounded-xl border border-border bg-surface p-4 text-sm shadow-lg"
-        >
-          <p className="font-medium text-foreground">Quick add</p>
-          <p className="mt-1 text-muted">
-            Fast entry capture is coming in a later phase.
-          </p>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="mt-3 w-full rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted hover:text-foreground"
+      <QuickAddModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onSaved={(message) => setToast(message)}
+      />
+
+      {mounted &&
+        toast &&
+        createPortal(
+          <div
+            role="status"
+            className="fixed inset-x-0 bottom-20 z-[60] mx-auto flex w-fit items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium shadow-lg md:bottom-6"
           >
-            Close
-          </button>
-        </div>
-      )}
-    </div>
+            <span
+              className="grid h-4 w-4 place-items-center rounded-full text-[10px] text-accent-fg"
+              style={{ background: "var(--accent)" }}
+              aria-hidden="true"
+            >
+              ✓
+            </span>
+            {toast}
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }

@@ -7,14 +7,19 @@ import type {
   Goals,
   Habit,
   HabitEntry,
+  InvestmentAllocation,
   MealEntry,
   MoneyEntry,
+  RecurringOutgoing,
+  UserProfile,
   WeightEntry,
   WorkoutEntry,
   WorkoutType,
 } from "./types";
 
 const DAYS = 90;
+/** Money history spans a full year so net-worth and 6-month charts look real. */
+const MONEY_DAYS = 365;
 
 /** Small, fast, seedable PRNG (mulberry32). */
 function mulberry32(seed: number) {
@@ -51,6 +56,7 @@ function pick<T>(rng: () => number, arr: readonly T[]): T {
 
 export const DEFAULT_GOALS: Goals = {
   savingsTarget: 120000,
+  monthlySavingsTarget: 8000,
   dailySpendTarget: 300,
   weightTargetRange: { min: 74, max: 78 },
   weeklyWorkoutGoal: 4,
@@ -58,13 +64,47 @@ export const DEFAULT_GOALS: Goals = {
   monthlyPublishGoal: 6,
 };
 
-export const DEFAULT_HABITS: Habit[] = [
-  { id: "habit_read", label: "Read 20 min", active: true },
-  { id: "habit_water", label: "2L water", active: true },
-  { id: "habit_meditate", label: "Meditate", active: true },
-  { id: "habit_nocaffeine", label: "No caffeine after 2pm", active: true },
-  { id: "habit_journal", label: "Journal", active: false },
+/** Starting net-worth (assets that predate the tracked money history), in AED. */
+export const NET_WORTH_BASELINE = 40000;
+
+export const DEFAULT_INVESTMENTS: InvestmentAllocation[] = [
+  { id: "inv_index", label: "Index funds", amount: 46000 },
+  { id: "inv_stocks", label: "Individual stocks", amount: 22000 },
+  { id: "inv_crypto", label: "Crypto", amount: 16000 },
+  { id: "inv_reits", label: "REITs", amount: 12000 },
+  { id: "inv_gold", label: "Gold & cash", amount: 9000 },
 ];
+
+export const DEFAULT_RECURRING: RecurringOutgoing[] = [
+  { id: "rec_rent", label: "Rent", amount: 6500 },
+  { id: "rec_utilities", label: "Utilities & internet", amount: 900 },
+  { id: "rec_groceries", label: "Groceries", amount: 2200 },
+  { id: "rec_car", label: "Car & fuel", amount: 1400 },
+  { id: "rec_subs", label: "Subscriptions", amount: 320 },
+  { id: "rec_gym", label: "Gym", amount: 250 },
+  { id: "rec_phone", label: "Phone", amount: 180 },
+];
+
+export const DEFAULT_HABITS: Habit[] = [
+  { id: "habit_reading", label: "Reading", active: true },
+  { id: "habit_football", label: "Football", active: true },
+  { id: "habit_driving", label: "Driving practice", active: true },
+  { id: "habit_music", label: "Music discovery", active: true },
+  { id: "habit_admin", label: "Admin", active: true },
+  { id: "habit_offline", label: "Time offline", active: true },
+];
+
+/** New users start un-onboarded so the setup wizard greets them. */
+export const DEFAULT_PROFILE: UserProfile = {
+  onboarded: false,
+  name: "",
+  priorities: ["money", "body", "life", "create"],
+  customGoals: [],
+  dietType: "omnivore",
+  calorieTarget: 2200,
+  monthlyIncome: 18000,
+  savingStyle: "steady",
+};
 
 /** Empty-but-valid dataset: no entries, default config. */
 export function emptyData(): AppData {
@@ -78,6 +118,16 @@ export function emptyData(): AppData {
     goals: { ...DEFAULT_GOALS, weightTargetRange: { ...DEFAULT_GOALS.weightTargetRange } },
     habits: DEFAULT_HABITS.map((h) => ({ ...h })),
     focuses: {},
+    investments: [],
+    recurring: [],
+    profile: {
+      ...DEFAULT_PROFILE,
+      priorities: [...DEFAULT_PROFILE.priorities],
+      customGoals: [...DEFAULT_PROFILE.customGoals],
+    },
+    mealPlan: null,
+    savingsPlan: null,
+    seenAchievements: [],
   };
 }
 
@@ -129,7 +179,22 @@ export function generateSeedData(): AppData {
     // Meals — one summary entry/day: cooked at home ~65% of days.
     meals.push({ id: makeId("m"), date, cookedAtHome: rng() < 0.65 });
 
-    // Money — 1–3 entries/day.
+    // Habits — per active habit, completed ~70% of days.
+    for (const h of activeHabits) {
+      habitEntries.push({
+        id: makeId("h"),
+        date,
+        habitId: h.id,
+        completed: rng() < 0.7,
+      });
+    }
+  }
+
+  // Money — its own 12-month history so net-worth and monthly charts fill out.
+  // ~2 transactions/day, biased so monthly saved lands near the ~8k target.
+  const investCategories = ["Index funds", "Individual stocks", "Crypto", "REITs"];
+  for (let i = MONEY_DAYS; i >= 0; i--) {
+    const date = daysAgo(i);
     const nTxns = 1 + Math.floor(rng() * 3);
     for (let t = 0; t < nTxns; t++) {
       const roll = rng();
@@ -147,7 +212,7 @@ export function generateSeedData(): AppData {
           id: makeId("mo"),
           date,
           type: "saved",
-          amount: Math.round((100 + rng() * 900) * 100) / 100,
+          amount: Math.round((150 + rng() * 850) * 100) / 100,
           category: "Savings",
           currency: "AED",
         });
@@ -157,20 +222,10 @@ export function generateSeedData(): AppData {
           date,
           type: "invested",
           amount: Math.round((200 + rng() * 1500) * 100) / 100,
-          category: pick(rng, ["Index fund", "Crypto", "Stocks"]),
+          category: pick(rng, investCategories),
           currency: "AED",
         });
       }
-    }
-
-    // Habits — per active habit, completed ~70% of days.
-    for (const h of activeHabits) {
-      habitEntries.push({
-        id: makeId("h"),
-        date,
-        habitId: h.id,
-        completed: rng() < 0.7,
-      });
     }
   }
 
@@ -230,5 +285,15 @@ export function generateSeedData(): AppData {
     goals: { ...DEFAULT_GOALS, weightTargetRange: { ...DEFAULT_GOALS.weightTargetRange } },
     habits,
     focuses,
+    investments: DEFAULT_INVESTMENTS.map((x) => ({ ...x })),
+    recurring: DEFAULT_RECURRING.map((x) => ({ ...x })),
+    profile: {
+      ...DEFAULT_PROFILE,
+      priorities: [...DEFAULT_PROFILE.priorities],
+      customGoals: [...DEFAULT_PROFILE.customGoals],
+    },
+    mealPlan: null,
+    savingsPlan: null,
+    seenAchievements: [],
   };
 }

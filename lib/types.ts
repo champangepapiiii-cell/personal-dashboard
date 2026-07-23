@@ -72,6 +72,8 @@ export interface ContentItem {
 export interface Goals {
   /** Target total savings, in AED. */
   savingsTarget: number;
+  /** Target amount to save each month, in AED. */
+  monthlySavingsTarget: number;
   /** Per-day spend ceiling, in AED — a day at or under this counts as "on budget". */
   dailySpendTarget: number;
   weightTargetRange: { min: number; max: number };
@@ -80,10 +82,88 @@ export interface Goals {
   monthlyPublishGoal: number;
 }
 
+/** One editable slice of the investment portfolio, in AED. */
+export interface InvestmentAllocation {
+  id: ID;
+  label: string;
+  amount: number;
+}
+
+/** One recurring monthly outgoing, in AED. */
+export interface RecurringOutgoing {
+  id: ID;
+  label: string;
+  amount: number;
+}
+
 export interface Habit {
   id: ID;
   label: string;
   active: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Coach: personalised setup, generated plans, and gamification.
+// ---------------------------------------------------------------------------
+
+export type FocusArea = "money" | "body" | "life" | "create";
+
+export type DietType =
+  | "omnivore"
+  | "vegetarian"
+  | "vegan"
+  | "pescatarian"
+  | "keto"
+  | "high-protein";
+
+export type SavingStyle = "aggressive" | "steady" | "relaxed";
+
+/** What a person tells the system about themselves during setup. */
+export interface UserProfile {
+  onboarded: boolean;
+  name: string;
+  /** Areas they most want to optimise, in priority order. */
+  priorities: FocusArea[];
+  /** Free-text personal goals in their own words — the engine interprets these. */
+  customGoals: string[];
+  dietType: DietType;
+  /** Daily calorie target. */
+  calorieTarget: number;
+  /** Take-home income per month, in AED. */
+  monthlyIncome: number;
+  savingStyle: SavingStyle;
+}
+
+export type MealSlot = "Breakfast" | "Lunch" | "Dinner";
+
+export interface PlannedMeal {
+  day: string; // e.g. "Mon"
+  slot: MealSlot;
+  recipeId: string;
+  done: boolean;
+}
+
+/** A generated weekly meal plan the user can tick off and regenerate. */
+export interface MealPlan {
+  createdAt: ISODate;
+  dietType: DietType;
+  calorieTarget: number;
+  meals: PlannedMeal[];
+}
+
+export interface SavingsWeek {
+  week: number;
+  amount: number;
+  done: boolean;
+}
+
+/** A generated savings challenge with weekly targets and tactics. */
+export interface SavingsPlan {
+  createdAt: ISODate;
+  style: SavingStyle;
+  target: number;
+  weeks: SavingsWeek[];
+  tactics: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -101,16 +181,30 @@ export interface AppData {
   habits: Habit[];
   /** One editable focus line per day, keyed by ISO date ("2026-07-22"). */
   focuses: Record<ISODate, string>;
+  /** Editable investment allocation (Money section). */
+  investments: InvestmentAllocation[];
+  /** Editable recurring monthly outgoings (Money section). */
+  recurring: RecurringOutgoing[];
+  /** Coach: who this person is and what they want to optimise. */
+  profile: UserProfile;
+  /** Coach: the current generated meal plan, or null before generation. */
+  mealPlan: MealPlan | null;
+  /** Coach: the current generated savings challenge, or null. */
+  savingsPlan: SavingsPlan | null;
+  /** Gamification: achievement ids already celebrated (so we only cheer once). */
+  seenAchievements: ID[];
 }
 
-/** Names of the array-of-entry collections in AppData. */
+/** Names of the array collections in AppData that support generic CRUD. */
 export type EntryCollection =
   | "weight"
   | "workouts"
   | "meals"
   | "money"
   | "habitEntries"
-  | "content";
+  | "content"
+  | "investments"
+  | "recurring";
 
 /** Maps a collection name to its element type. */
 export interface EntryTypeMap {
@@ -120,4 +214,6 @@ export interface EntryTypeMap {
   money: MoneyEntry;
   habitEntries: HabitEntry;
   content: ContentItem;
+  investments: InvestmentAllocation;
+  recurring: RecurringOutgoing;
 }

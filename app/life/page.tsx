@@ -1,30 +1,28 @@
 "use client";
 
-import { PageStub } from "@/components/PageStub";
-import { useStore } from "@/lib/store-context";
-import { useTimeframe } from "@/lib/timeframe";
-import { withinDays } from "@/lib/dates";
+import { HabitConsistency } from "@/components/life/HabitConsistency";
+import { HabitGrid } from "@/components/life/HabitGrid";
+import { HabitManager } from "@/components/life/HabitManager";
 
 export default function LifePage() {
-  const { data } = useStore();
-  const { days } = useTimeframe();
-
-  const activeHabits = data.habits.filter((h) => h.active).length;
-  const entries = data.habitEntries.filter((e) => withinDays(e.date, days));
-  const completed = entries.filter((e) => e.completed).length;
-  const rate = entries.length ? Math.round((completed / entries.length) * 100) : 0;
-
   return (
-    <PageStub
-      title="Life"
-      accent="var(--life)"
-      description="Habits and routines."
-      stats={[
-        { label: "Active habits", value: activeHabits },
-        { label: "Completions", value: completed },
-        { label: "Logged", value: entries.length },
-        { label: "Completion rate", value: `${rate}%` },
-      ]}
-    />
+    <div className="mx-auto max-w-5xl space-y-4 md:space-y-5">
+      <div className="flex items-center gap-3">
+        <span className="h-8 w-1.5 rounded-full" style={{ background: "var(--life)" }} />
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight" style={{ color: "var(--life)" }}>
+            Life
+          </h1>
+          <p className="text-sm text-muted">Habits and consistency.</p>
+        </div>
+      </div>
+
+      <HabitGrid />
+
+      <div className="grid gap-4 md:gap-5 lg:grid-cols-2">
+        <HabitConsistency />
+        <HabitManager />
+      </div>
+    </div>
   );
 }

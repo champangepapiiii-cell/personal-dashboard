@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { DailyFocus } from "@/components/today/DailyFocus";
 import { StreakCard } from "@/components/today/StreakCard";
+import { TodayHabits } from "@/components/today/TodayHabits";
 import { WeeklyRing } from "@/components/today/WeeklyRing";
 import { computeStreaks, weeklyCompletion } from "@/lib/metrics";
 import { useStore } from "@/lib/store-context";
@@ -59,6 +60,8 @@ export default function TodayPage() {
       </div>
 
       <WeeklyRing completion={completion} ready={hydrated} />
+
+      <TodayHabits />
     </div>
   );
 }

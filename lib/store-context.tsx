@@ -13,6 +13,9 @@ import type {
   EntryTypeMap,
   Goals,
   Habit,
+  MealPlan,
+  SavingsPlan,
+  UserProfile,
 } from "./types";
 
 interface StoreContextValue {
@@ -24,7 +27,12 @@ interface StoreContextValue {
   setEntries: <K extends EntryCollection>(key: K, entries: EntryTypeMap[K][]) => void;
   setGoals: (goals: Goals) => void;
   setHabits: (habits: Habit[]) => void;
+  setHabitCompletion: (habitId: string, dateKey: string, completed: boolean) => void;
   setFocus: (dateKey: string, text: string) => void;
+  setProfile: (profile: UserProfile) => void;
+  setMealPlan: (plan: MealPlan | null) => void;
+  setSavingsPlan: (plan: SavingsPlan | null) => void;
+  markAchievementsSeen: (ids: string[]) => void;
   resetToDemo: () => void;
   clearAll: () => void;
 }
@@ -62,7 +70,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setEntries: (key, entries) => store.setEntries(key, entries),
       setGoals: (goals) => store.setGoals(goals),
       setHabits: (habits) => store.setHabits(habits),
+      setHabitCompletion: (habitId, dateKey, completed) =>
+        store.setHabitCompletion(habitId, dateKey, completed),
       setFocus: (dateKey, text) => store.setFocus(dateKey, text),
+      setProfile: (profile) => store.setProfile(profile),
+      setMealPlan: (plan) => store.setMealPlan(plan),
+      setSavingsPlan: (plan) => store.setSavingsPlan(plan),
+      markAchievementsSeen: (ids) => store.markAchievementsSeen(ids),
       resetToDemo: () => store.resetToDemo(),
       clearAll: () => store.clearAll(),
     }),

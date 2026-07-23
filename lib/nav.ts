@@ -41,4 +41,10 @@ export const NAV_ITEMS: NavItem[] = [
     accent: "var(--create)",
     icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
   },
+  {
+    label: "Coach",
+    href: "/coach",
+    accent: "var(--coach)",
+    icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L22 12l-6.714 2.143L13 21l-2.286-6.857L4 12l6.714-2.143L13 3z",
+  },
 ];

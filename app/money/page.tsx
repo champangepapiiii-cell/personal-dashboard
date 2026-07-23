@@ -1,31 +1,33 @@
 "use client";
 
-import { PageStub } from "@/components/PageStub";
-import { useStore } from "@/lib/store-context";
-import { useTimeframe } from "@/lib/timeframe";
-import { withinDays } from "@/lib/dates";
+import { AllocationDonut } from "@/components/money/AllocationDonut";
+import { NetWorthChart } from "@/components/money/NetWorthChart";
+import { RecurringTable } from "@/components/money/RecurringTable";
+import { SavedVsTarget } from "@/components/money/SavedVsTarget";
+import { SavingsProgress } from "@/components/money/SavingsProgress";
 
 export default function MoneyPage() {
-  const { data } = useStore();
-  const { days } = useTimeframe();
-
-  const inRange = data.money.filter((m) => withinDays(m.date, days));
-  const sum = (type: string) =>
-    inRange.filter((m) => m.type === type).reduce((s, m) => s + m.amount, 0);
-
-  const fmt = (n: number) => Math.round(n).toLocaleString();
-
   return (
-    <PageStub
-      title="Money"
-      accent="var(--money)"
-      description="Saved, spent, invested — in AED."
-      stats={[
-        { label: "Saved", value: fmt(sum("saved")) },
-        { label: "Spent", value: fmt(sum("spent")) },
-        { label: "Invested", value: fmt(sum("invested")) },
-        { label: "Transactions", value: inRange.length },
-      ]}
-    />
+    <div className="mx-auto max-w-5xl space-y-4 md:space-y-5">
+      <div className="flex items-center gap-3">
+        <span className="h-8 w-1.5 rounded-full" style={{ background: "var(--money)" }} />
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight" style={{ color: "var(--money)" }}>
+            Money
+          </h1>
+          <p className="text-sm text-muted">Savings, net worth, investments and outgoings — in AED.</p>
+        </div>
+      </div>
+
+      <SavingsProgress />
+      <NetWorthChart />
+
+      <div className="grid gap-4 md:gap-5 lg:grid-cols-2">
+        <AllocationDonut />
+        <SavedVsTarget />
+      </div>
+
+      <RecurringTable />
+    </div>
   );
 }

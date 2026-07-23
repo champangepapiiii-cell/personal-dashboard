@@ -50,3 +50,34 @@ export function formatLongDate(d: Date = new Date()): string {
     year: "numeric",
   });
 }
+
+/** Fixed month labels — avoids any locale/SSR drift in chart axes. */
+export const MONTH_ABBR = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+] as const;
+
+export interface MonthBucket {
+  year: number;
+  /** 0–11 */
+  month: number;
+  /** e.g. "Jul" */
+  label: string;
+}
+
+/** The last `n` calendar months, oldest first, including the current month. */
+export function lastNMonths(n: number): MonthBucket[] {
+  const now = new Date();
+  const buckets: MonthBucket[] = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    buckets.push({ year: d.getFullYear(), month: d.getMonth(), label: MONTH_ABBR[d.getMonth()] });
+  }
+  return buckets;
+}
+
+/** Extract [year, month0] from an ISO date key ("2026-07-22"). */
+export function yearMonthOf(iso: string): [number, number] {
+  const [y, m] = iso.split("-");
+  return [Number(y), Number(m) - 1];
+}
