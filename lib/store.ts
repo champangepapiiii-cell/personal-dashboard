@@ -198,3 +198,19 @@ export function resetToDemo(): void {
 export function clearAll(): void {
   persist(emptyData());
 }
+
+/**
+ * Load a full dataset from an imported object (e.g. a restored JSON backup).
+ * Runs it through `normalise` so missing/older fields get safe defaults.
+ * Returns false if the payload isn't a usable object.
+ */
+export function importData(parsed: unknown): boolean {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return false;
+  persist(normalise(parsed as Partial<AppData>));
+  return true;
+}
+
+/** The current dataset serialised for download. */
+export function exportJSON(): string {
+  return JSON.stringify(getData(), null, 2);
+}

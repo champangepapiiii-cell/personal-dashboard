@@ -6,6 +6,8 @@
 import { useState } from "react";
 import { Cell, Pie, PieChart, Tooltip } from "recharts";
 import { Card } from "@/components/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { newId } from "@/lib/id";
 import { aed } from "@/lib/money";
 import { useStore } from "@/lib/store-context";
@@ -74,7 +76,21 @@ export function AllocationDonut() {
       }
     >
       {!hydrated ? (
-        <div className="h-56" />
+        <Skeleton className="h-52 w-full" />
+      ) : !editing && items.length === 0 ? (
+        <EmptyState
+          icon="🥧"
+          title="No investments tracked"
+          message="Add your holdings and this donut shows how they're split."
+          action={
+            <button
+              onClick={startEdit}
+              className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-fg hover:opacity-90"
+            >
+              Add categories
+            </button>
+          }
+        />
       ) : (
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
           <div className="relative h-52 w-52 shrink-0">

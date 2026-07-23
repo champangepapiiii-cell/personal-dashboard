@@ -1,6 +1,8 @@
 "use client";
 
 import { Card } from "@/components/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { trainingHeatmap, WORKOUT_COLORS, WORKOUT_LEGEND } from "@/lib/body";
 import { useStore } from "@/lib/store-context";
 import { Heatmap } from "./Heatmap";
@@ -8,6 +10,7 @@ import { Heatmap } from "./Heatmap";
 export function TrainingHeatmap() {
   const { data, hydrated } = useStore();
   const grid = trainingHeatmap(data, 12);
+  const hasWorkouts = data.workouts.length > 0;
 
   return (
     <Card
@@ -26,7 +29,18 @@ export function TrainingHeatmap() {
         ) : null
       }
     >
-      {hydrated ? <Heatmap grid={grid} /> : <div className="h-28" />}
+      {!hydrated ? (
+        <Skeleton className="h-28 w-full" />
+      ) : hasWorkouts ? (
+        <Heatmap grid={grid} />
+      ) : (
+        <EmptyState
+          icon="🏋️"
+          title="No workouts logged"
+          message="Log a session from Quick add and it'll light up this 12-week grid."
+          compact
+        />
+      )}
     </Card>
   );
 }

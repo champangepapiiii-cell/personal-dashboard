@@ -4,6 +4,8 @@
 // horizontal bar list.
 
 import { Card } from "@/components/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { SkeletonLines } from "@/components/ui/Skeleton";
 import { dayKeyDaysAgo } from "@/lib/dates";
 import { useStore } from "@/lib/store-context";
 
@@ -27,12 +29,18 @@ export function HabitConsistency() {
 
   return (
     <Card title="Consistency" subtitle="% of the last 30 days">
-      {hydrated && rows.length === 0 ? (
-        <p className="py-4 text-sm text-muted">No active habits yet.</p>
+      {!hydrated ? (
+        <SkeletonLines rows={5} className="py-2" />
+      ) : rows.length === 0 ? (
+        <EmptyState
+          icon="📊"
+          title="No habits to measure"
+          message="Once you have active habits, their 30-day consistency shows up here."
+          compact
+        />
       ) : (
         <div className="space-y-3">
-          {hydrated &&
-            rows.map((r) => (
+          {rows.map((r) => (
               <div key={r.id}>
                 <div className="mb-1 flex items-baseline justify-between text-sm">
                   <span className="truncate pr-2">{r.label}</span>

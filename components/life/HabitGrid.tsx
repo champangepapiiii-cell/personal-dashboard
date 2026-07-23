@@ -4,6 +4,8 @@
 // habit's completion for that day — writes straight to the store.
 
 import { Card } from "@/components/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { SkeletonLines } from "@/components/ui/Skeleton";
 import { dayKeyDaysAgo, MONTH_ABBR } from "@/lib/dates";
 import { useStore } from "@/lib/store-context";
 
@@ -26,8 +28,15 @@ export function HabitGrid() {
 
   return (
     <Card title="Habit grid" subtitle="Last 30 days · tap any cell to toggle">
-      {hydrated && habits.length === 0 ? (
-        <p className="py-4 text-sm text-muted">No active habits. Add some below.</p>
+      {!hydrated ? (
+        <SkeletonLines rows={6} className="py-2" />
+      ) : habits.length === 0 ? (
+        <EmptyState
+          icon="✅"
+          title="No active habits"
+          message="Add a habit in the manager below, then tap days here to build your streak."
+          compact
+        />
       ) : (
         <div className="overflow-x-auto pb-1">
           <div className="min-w-max">

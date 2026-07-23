@@ -8,19 +8,22 @@ import { createPortal } from "react-dom";
 import { dayKey } from "@/lib/dates";
 import { newId } from "@/lib/id";
 import { useStore } from "@/lib/store-context";
-import type { MoneyType, WorkoutType } from "@/lib/types";
+import type { ContentFormat, MoneyType, WorkoutType } from "@/lib/types";
 
-type Tab = "workout" | "weight" | "meal" | "money";
+type Tab = "workout" | "weight" | "meal" | "money" | "habit" | "idea";
 
 const TABS: { id: Tab; label: string; accent: string }[] = [
   { id: "workout", label: "Workout", accent: "var(--body)" },
   { id: "weight", label: "Weight", accent: "var(--body)" },
   { id: "meal", label: "Meal", accent: "var(--life)" },
   { id: "money", label: "Money", accent: "var(--money)" },
+  { id: "habit", label: "Habit", accent: "var(--life)" },
+  { id: "idea", label: "Idea", accent: "var(--create)" },
 ];
 
 const WORKOUT_TYPES: WorkoutType[] = ["gym", "run", "football", "other"];
 const MONEY_TYPES: MoneyType[] = ["spent", "saved", "invested"];
+const FORMATS: ContentFormat[] = ["blog", "video", "newsletter", "social"];
 
 export function QuickAddModal({
   open,
@@ -31,7 +34,7 @@ export function QuickAddModal({
   onClose: () => void;
   onSaved: (message: string) => void;
 }) {
-  const { addEntry } = useStore();
+  const { data, addEntry, setHabitCompletion } = useStore();
   const [tab, setTab] = useState<Tab>("workout");
   // Portal target: the header's backdrop-filter would otherwise trap `fixed`.
   const [mounted, setMounted] = useState(false);
@@ -46,6 +49,8 @@ export function QuickAddModal({
   const [moneyType, setMoneyType] = useState<MoneyType>("spent");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
+  const [ideaTitle, setIdeaTitle] = useState("");
+  const [ideaFormat, setIdeaFormat] = useState<ContentFormat>("blog");
 
   useEffect(() => {
     if (!open) return;
@@ -68,7 +73,14 @@ export function QuickAddModal({
     setMoneyType("spent");
     setAmount("");
     setCategory("");
+    setIdeaTitle("");
+    setIdeaFormat("blog");
   };
+
+  const activeHabits = data.habits.filter((h) => h.active);
+  const doneToday = new Set(
+    data.habitEntries.filter((h) => h.date === today && h.completed).map((h) => h.habitId),
+  );
 
   const close = () => {
     reset();
@@ -95,7 +107,7 @@ export function QuickAddModal({
     } else if (tab === "meal") {
       addEntry("meals", { id: newId("m"), date: today, cookedAtHome });
       onSaved(cookedAtHome ? "Logged a home-cooked meal" : "Logged an eating-out meal");
-    } else {
+    } else if (tab === "money") {
       const amt = Number(amount);
       if (!Number.isFinite(amt) || amt <= 0) return;
       addEntry("money", {
@@ -107,15 +119,35 @@ export function QuickAddModal({
         currency: "AED",
       });
       onSaved(`Logged AED ${amt} ${moneyType}`);
+    } else if (tab === "idea") {
+      const t = ideaTitle.trim();
+      if (!t) return;
+      addEntry("content", {
+        id: newId("c"),
+        title: t,
+        format: ideaFormat,
+        status: "idea",
+        createdAt: today,
+      });
+      onSaved(`Captured idea: ${t}`);
+    } else {
+      return;
     }
     close();
+  };
+
+  const toggleHabit = (id: string, label: string) => {
+    const nowDone = !doneToday.has(id);
+    setHabitCompletion(id, today, nowDone);
+    onSaved(nowDone ? `Ticked ${label}` : `Unticked ${label}`);
   };
 
   const canSave =
     tab === "meal" ||
     (tab === "workout" && Number(duration) > 0) ||
     (tab === "weight" && Number(kg) > 0) ||
-    (tab === "money" && Number(amount) > 0);
+    (tab === "money" && Number(amount) > 0) ||
+    (tab === "idea" && ideaTitle.trim().length > 0);
 
   return createPortal(
     <div
@@ -143,7 +175,7 @@ export function QuickAddModal({
         </div>
 
         {/* Type selector */}
-        <div className="mt-4 grid grid-cols-4 gap-1.5 rounded-xl bg-surface-2 p-1">
+        <div className="mt-4 grid grid-cols-3 gap-1.5 rounded-xl bg-surface-2 p-1 sm:grid-cols-6">
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -248,24 +280,88 @@ export function QuickAddModal({
               </Field>
             </>
           )}
+
+          {tab === "habit" && (
+            <Field label="Tap to tick off today's habits">
+              {activeHabits.length === 0 ? (
+                <p className="text-sm text-muted">No active habits. Add some in Life or Settings.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {activeHabits.map((h) => {
+                    const done = doneToday.has(h.id);
+                    return (
+                      <button
+                        key={h.id}
+                        type="button"
+                        onClick={() => toggleHabit(h.id, h.label)}
+                        aria-pressed={done}
+                        className={
+                          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors " +
+                          (done ? "border-transparent text-white" : "border-border text-foreground hover:border-life")
+                        }
+                        style={done ? { background: "var(--life)" } : undefined}
+                      >
+                        <span aria-hidden="true">{done ? "✓" : "+"}</span>
+                        {h.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </Field>
+          )}
+
+          {tab === "idea" && (
+            <>
+              <Field label="Idea">
+                <input
+                  type="text"
+                  value={ideaTitle}
+                  onChange={(e) => setIdeaTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && ideaTitle.trim()) save();
+                  }}
+                  placeholder="What's the idea?"
+                  autoFocus
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Format">
+                <Segmented options={FORMATS} value={ideaFormat} onChange={setIdeaFormat} />
+              </Field>
+              <p className="text-xs text-muted">Drops straight into the Create board&rsquo;s Idea column.</p>
+            </>
+          )}
         </div>
 
         <div className="mt-5 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={close}
-            className="rounded-lg px-3 py-2 text-sm font-medium text-muted hover:text-foreground"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={save}
-            disabled={!canSave}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-fg shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Save entry
-          </button>
+          {tab === "habit" ? (
+            <button
+              type="button"
+              onClick={close}
+              className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-fg shadow-sm transition-opacity hover:opacity-90"
+            >
+              Done
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={close}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-muted hover:text-foreground"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={save}
+                disabled={!canSave}
+                className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-fg shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Save entry
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>,

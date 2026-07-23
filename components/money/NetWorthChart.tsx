@@ -9,6 +9,8 @@ import {
   YAxis,
 } from "recharts";
 import { Card } from "@/components/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { aed, netWorthSeries } from "@/lib/money";
 import { useStore } from "@/lib/store-context";
 import { useMeasure } from "@/lib/useMeasure";
@@ -19,6 +21,7 @@ const CHART_H = 256;
 export function NetWorthChart() {
   const { data, hydrated } = useStore();
   const series = netWorthSeries(data, 12);
+  const hasMoney = data.money.length > 0;
   const { ref, width } = useMeasure<HTMLDivElement>();
 
   const latest = series.length ? series[series.length - 1].value : 0;
@@ -45,7 +48,16 @@ export function NetWorthChart() {
       }
     >
       <div ref={ref} className="w-full" style={{ height: CHART_H }}>
-        {hydrated && width > 0 && (
+        {!hydrated ? (
+          <Skeleton className="h-full w-full" />
+        ) : !hasMoney ? (
+          <EmptyState
+            icon="📈"
+            title="Your net worth will build here"
+            message="Log savings or investments from Quick add and this line starts filling in."
+          />
+        ) : (
+          width > 0 && (
           <AreaChart data={series} width={width} height={CHART_H} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
               <defs>
                 <linearGradient id="nwFill" x1="0" y1="0" x2="0" y2="1">
@@ -85,6 +97,7 @@ export function NetWorthChart() {
                 isAnimationActive={false}
               />
             </AreaChart>
+          )
         )}
       </div>
     </Card>

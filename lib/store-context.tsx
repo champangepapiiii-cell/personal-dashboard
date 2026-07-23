@@ -33,6 +33,7 @@ interface StoreContextValue {
   setMealPlan: (plan: MealPlan | null) => void;
   setSavingsPlan: (plan: SavingsPlan | null) => void;
   markAchievementsSeen: (ids: string[]) => void;
+  importData: (parsed: unknown) => boolean;
   resetToDemo: () => void;
   clearAll: () => void;
 }
@@ -77,6 +78,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setMealPlan: (plan) => store.setMealPlan(plan),
       setSavingsPlan: (plan) => store.setSavingsPlan(plan),
       markAchievementsSeen: (ids) => store.markAchievementsSeen(ids),
+      importData: (parsed) => store.importData(parsed),
       resetToDemo: () => store.resetToDemo(),
       clearAll: () => store.clearAll(),
     }),

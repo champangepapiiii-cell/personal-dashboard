@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/Card";
+import { SkeletonLines } from "@/components/ui/Skeleton";
 import { newId } from "@/lib/id";
 import { aed, recurringTotal } from "@/lib/money";
 import { useStore } from "@/lib/store-context";
@@ -38,7 +39,7 @@ export function RecurringTable() {
       }
     >
       {!hydrated ? (
-        <div className="h-32" />
+        <SkeletonLines rows={4} className="py-2" />
       ) : (
         <>
           <div className="divide-y divide-border">
@@ -56,7 +57,9 @@ export function RecurringTable() {
               </div>
             ))}
             {data.recurring.length === 0 && (
-              <p className="py-3 text-sm text-muted">No recurring outgoings yet.</p>
+              <p className="py-3 text-sm text-muted">
+                Nothing recurring yet — add rent, subscriptions or bills below.
+              </p>
             )}
           </div>
 

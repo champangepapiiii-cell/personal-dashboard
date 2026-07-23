@@ -10,6 +10,8 @@ import {
   YAxis,
 } from "recharts";
 import { Card } from "@/components/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { aed, savedVsTarget } from "@/lib/money";
 import { useStore } from "@/lib/store-context";
 import { useMeasure } from "@/lib/useMeasure";
@@ -20,12 +22,21 @@ const CHART_H = 256;
 export function SavedVsTarget() {
   const { data, hydrated } = useStore();
   const series = savedVsTarget(data, 6);
+  const hasSaved = data.money.some((m) => m.type === "saved");
   const { ref, width } = useMeasure<HTMLDivElement>();
 
   return (
     <Card title="Saved vs target" subtitle="Last 6 months">
       <div ref={ref} className="w-full" style={{ height: CHART_H }}>
-        {hydrated && width > 0 && (
+        {!hydrated && <Skeleton className="h-full w-full" />}
+        {hydrated && !hasSaved && (
+          <EmptyState
+            icon="🪙"
+            title="No savings logged yet"
+            message="Log a “saved” entry from Quick add and it'll stack up against your monthly target here."
+          />
+        )}
+        {hydrated && hasSaved && width > 0 && (
           <BarChart data={series} width={width} height={CHART_H} margin={{ top: 8, right: 8, bottom: 0, left: 8 }} barGap={4}>
               <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
               <XAxis dataKey="label" tick={axisTick} axisLine={false} tickLine={false} />

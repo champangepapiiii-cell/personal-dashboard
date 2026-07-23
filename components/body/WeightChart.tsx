@@ -10,6 +10,8 @@ import {
   YAxis,
 } from "recharts";
 import { Card } from "@/components/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { latestWeight, weightSeries } from "@/lib/body";
 import { useStore } from "@/lib/store-context";
 import { useTimeframe } from "@/lib/timeframe";
@@ -47,7 +49,15 @@ export function WeightChart() {
       }
     >
       <div ref={ref} className="w-full" style={{ height: CHART_H }}>
-        {hydrated && width > 0 && (
+        {!hydrated && <Skeleton className="h-full w-full" />}
+        {hydrated && values.length === 0 && (
+          <EmptyState
+            icon="⚖️"
+            title="No weigh-ins yet"
+            message="Log your weight from Quick add and the trend line (with your target band) appears here."
+          />
+        )}
+        {hydrated && values.length > 0 && width > 0 && (
           <LineChart data={series} width={width} height={CHART_H} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
             <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
             {/* Target range as a shaded band — a range, not a single line. */}
