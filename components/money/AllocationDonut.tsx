@@ -93,7 +93,14 @@ export function AllocationDonut() {
           }
         />
       ) : (
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
+        <div
+          className={
+            "flex flex-col items-center gap-4 " +
+            // When editing, keep the donut stacked above the inputs so the
+            // name + amount fields get the full card width (no clipping).
+            (editing ? "" : "sm:flex-row sm:items-center sm:gap-6")
+          }
+        >
           <div className="relative h-52 w-52 shrink-0">
             <PieChart width={208} height={208}>
               <Pie
