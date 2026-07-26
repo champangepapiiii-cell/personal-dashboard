@@ -6,6 +6,7 @@
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { generateMealPlan, generateSavingsPlan, inferAreas, interpretGoal } from "@/lib/coach";
+import { CURRENCIES } from "@/lib/currency";
 import { useStore } from "@/lib/store-context";
 import type { DietType, FocusArea, SavingStyle, UserProfile } from "@/lib/types";
 
@@ -43,6 +44,7 @@ export function OnboardingWizard({ onDone }: { onDone: () => void }) {
   const [calorieTarget, setCalorieTarget] = useState(String(data.profile.calorieTarget));
   const [monthlyIncome, setMonthlyIncome] = useState(String(data.profile.monthlyIncome));
   const [savingStyle, setSavingStyle] = useState<SavingStyle>(data.profile.savingStyle);
+  const [currency, setCurrency] = useState(data.profile.currency || "AED");
 
   const steps = ["You", "Body", "Money", "Ready"];
 
@@ -58,8 +60,9 @@ export function OnboardingWizard({ onDone }: { onDone: () => void }) {
       calorieTarget: Math.max(1000, Number(calorieTarget) || 2000),
       monthlyIncome: Math.max(0, Number(monthlyIncome) || 0),
       savingStyle,
+      currency,
     };
-  }, [name, priorities, customGoals, dietType, calorieTarget, monthlyIncome, savingStyle]);
+  }, [name, priorities, customGoals, dietType, calorieTarget, monthlyIncome, savingStyle, currency]);
 
   const togglePriority = (id: FocusArea) =>
     setPriorities((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
@@ -241,7 +244,20 @@ export function OnboardingWizard({ onDone }: { onDone: () => void }) {
 
           {step === 2 && (
             <>
-              <Field label="Monthly take-home income (AED)">
+              <Field label="Currency">
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className={inputClass}
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} — {c.name} ({c.symbol})
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label={`Monthly take-home income (${currency})`}>
                 <input
                   type="number"
                   inputMode="numeric"
@@ -283,7 +299,7 @@ export function OnboardingWizard({ onDone }: { onDone: () => void }) {
               <Summary label="Diet" value={`${cap(dietType)} · ${profile.calorieTarget} kcal/day`} />
               <Summary
                 label="Money"
-                value={`${(profile.monthlyIncome).toLocaleString("en-US")} AED/mo · ${cap(savingStyle)} saving`}
+                value={`${currency} ${(profile.monthlyIncome).toLocaleString("en-US")}/mo · ${cap(savingStyle)} saving`}
               />
               {customGoals.length > 0 && (
                 <div className="rounded-lg border border-border bg-surface-2 px-3 py-2">

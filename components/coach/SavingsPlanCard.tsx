@@ -6,12 +6,12 @@
 import { Card } from "@/components/Card";
 import { generateSavingsPlan } from "@/lib/coach";
 import { dayKey } from "@/lib/dates";
+import { useMoney } from "@/lib/useMoney";
 import { useStore } from "@/lib/store-context";
-
-const aed = (n: number) => `${Math.round(n).toLocaleString("en-US")}`;
 
 export function SavingsPlanCard() {
   const { data, hydrated, setSavingsPlan, addEntry, removeEntry } = useStore();
+  const { fmt, code } = useMoney();
   const plan = data.savingsPlan;
 
   if (!hydrated) return <Card title="Savings challenge"><div className="h-24" /></Card>;
@@ -57,7 +57,7 @@ export function SavingsPlanCard() {
         type: "saved",
         amount: target.amount,
         category: "Savings challenge",
-        currency: "AED",
+        currency: data.profile.currency,
       });
     } else {
       removeEntry("money", id);
@@ -84,9 +84,9 @@ export function SavingsPlanCard() {
       }
     >
       <div className="flex items-baseline justify-between">
-        <span className="text-2xl font-semibold tabular-nums text-coach">{aed(saved)} <span className="text-sm font-normal text-muted">AED</span></span>
+        <span className="text-2xl font-semibold tabular-nums text-coach">{fmt(saved, false)} <span className="text-sm font-normal text-muted">{code}</span></span>
         <span className="text-xs text-muted tabular-nums">
-          {doneCount}/{plan.weeks.length} weeks · goal {aed(plan.target)} AED
+          {doneCount}/{plan.weeks.length} weeks · goal {fmt(plan.target, false)} {code}
         </span>
       </div>
       <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-surface-2">
@@ -105,7 +105,7 @@ export function SavingsPlanCard() {
             }
           >
             <div className="text-[10px] uppercase tracking-wide opacity-70">Wk {w.week}</div>
-            <div className="text-sm font-semibold tabular-nums">{aed(w.amount)}</div>
+            <div className="text-sm font-semibold tabular-nums">{fmt(w.amount, false)}</div>
           </button>
         ))}
       </div>

@@ -11,7 +11,8 @@ import {
 import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { aed, netWorthSeries } from "@/lib/money";
+import { netWorthSeries } from "@/lib/money";
+import { useMoney } from "@/lib/useMoney";
 import { useStore } from "@/lib/store-context";
 import { useMeasure } from "@/lib/useMeasure";
 
@@ -20,6 +21,7 @@ const CHART_H = 256;
 
 export function NetWorthChart() {
   const { data, hydrated } = useStore();
+  const { fmt } = useMoney();
   const series = netWorthSeries(data, 12);
   const hasMoney = data.money.length > 0;
   const { ref, width } = useMeasure<HTMLDivElement>();
@@ -35,13 +37,13 @@ export function NetWorthChart() {
       right={
         hydrated ? (
           <div className="text-right">
-            <div className="text-lg font-semibold tabular-nums">{aed(latest)}</div>
+            <div className="text-lg font-semibold tabular-nums">{fmt(latest)}</div>
             <div
               className="text-xs font-medium tabular-nums"
               style={{ color: delta >= 0 ? "var(--positive)" : "var(--negative)" }}
             >
               {delta >= 0 ? "+" : "−"}
-              {aed(Math.abs(delta), false)} yr
+              {fmt(Math.abs(delta), false)} yr
             </div>
           </div>
         ) : null
@@ -84,7 +86,7 @@ export function NetWorthChart() {
                   fontSize: 13,
                 }}
                 labelStyle={{ color: "var(--muted)" }}
-                formatter={(v) => [aed(Number(v)), "Net worth"]}
+                formatter={(v) => [fmt(Number(v)), "Net worth"]}
               />
               <Area
                 type="monotone"

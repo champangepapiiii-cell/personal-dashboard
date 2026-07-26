@@ -9,7 +9,7 @@ import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { newId } from "@/lib/id";
-import { aed } from "@/lib/money";
+import { useMoney } from "@/lib/useMoney";
 import { useStore } from "@/lib/store-context";
 import type { InvestmentAllocation } from "@/lib/types";
 
@@ -20,6 +20,7 @@ const PALETTE = [
 
 export function AllocationDonut() {
   const { data, hydrated, setEntries } = useStore();
+  const { fmt } = useMoney();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<InvestmentAllocation[]>([]);
 
@@ -49,7 +50,7 @@ export function AllocationDonut() {
   return (
     <Card
       title="Investment allocation"
-      subtitle={hydrated ? aed(total) : undefined}
+      subtitle={hydrated ? fmt(total) : undefined}
       right={
         hydrated ? (
           editing ? (
@@ -119,12 +120,12 @@ export function AllocationDonut() {
                   color: "var(--foreground)",
                   fontSize: 13,
                 }}
-                formatter={(v, name) => [aed(Number(v)), name]}
+                formatter={(v, name) => [fmt(Number(v)), name]}
               />
             </PieChart>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-xs text-muted">Total</span>
-              <span className="text-lg font-semibold tabular-nums">{aed(total, false)}</span>
+              <span className="text-lg font-semibold tabular-nums">{fmt(total, false)}</span>
             </div>
           </div>
 
@@ -162,7 +163,7 @@ export function AllocationDonut() {
                     <>
                       <span className="min-w-0 flex-1 truncate">{x.label}</span>
                       <span className="tabular-nums text-muted">{pct}%</span>
-                      <span className="w-24 text-right tabular-nums">{aed(x.amount, false)}</span>
+                      <span className="w-24 text-right tabular-nums">{fmt(x.amount, false)}</span>
                     </>
                   )}
                 </div>

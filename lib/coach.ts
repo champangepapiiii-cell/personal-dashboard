@@ -71,7 +71,7 @@ const GOAL_THEMES: GoalTheme[] = [
     steps: [
       "List balances and target the highest-interest one first.",
       "Set a fixed monthly payment and automate it.",
-      "Track every AED that goes toward it in Money.",
+      "Track every payment that goes toward it in Money.",
     ],
     habit: "No-spend check-in",
   },
@@ -333,7 +333,7 @@ function buildTactics(profile: UserProfile): string[] {
     t.push("Automate a transfer the day your salary lands — pay yourself first.");
     t.push("Run two no-spend days a week; bank what you'd have spent.");
   } else if (profile.savingStyle === "relaxed") {
-    t.push("Round every card purchase up to the nearest 10 AED and stash the difference.");
+    t.push(`Round every card purchase up to the nearest 10 ${profile.currency} and stash the difference.`);
     t.push("Try one no-spend day a week to start the habit gently.");
   } else {
     t.push("Split your salary 50/30/20 — needs, wants, and this challenge.");
@@ -341,7 +341,7 @@ function buildTactics(profile: UserProfile): string[] {
   }
   t.push("Cook at home more — every home meal is a small, repeatable win.");
   if (profile.monthlyIncome > 0) {
-    t.push(`Auto-invest 10% of income (~${Math.round((profile.monthlyIncome * 0.1) / 10) * 10} AED/mo) into a low-cost index fund.`);
+    t.push(`Auto-invest 10% of income (~${profile.currency} ${Math.round((profile.monthlyIncome * 0.1) / 10) * 10}/mo) into a low-cost index fund.`);
   }
   return t;
 }
@@ -419,7 +419,7 @@ export function generateInsights(data: AppData): Insight[] {
   if (saved30 > 0) {
     out.push({
       title: "Savings momentum",
-      detail: `You saved ~${Math.round(saved30).toLocaleString("en-US")} AED in the last 30 days. Automating it makes it effortless.`,
+      detail: `You saved ~${data.profile.currency} ${Math.round(saved30).toLocaleString("en-US")} in the last 30 days. Automating it makes it effortless.`,
       tone: saved30 >= data.goals.monthlySavingsTarget ? "good" : "info",
     });
   }

@@ -114,7 +114,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     check: (d) => computeStreaks(d).cooked >= 5 },
   { id: "budget_streak", label: "On Budget", description: "5 days under your spend target", icon: "🎯",
     check: (d) => computeStreaks(d).underSpend >= 5 },
-  { id: "saver", label: "Saver", description: "Save 10,000 AED in total", icon: "💰",
+  { id: "saver", label: "Saver", description: "Save 10,000 in total", icon: "💰",
     check: (d) => d.money.filter((m) => m.type === "saved").reduce((s, m) => s + m.amount, 0) >= 10000 },
   { id: "investor", label: "Investor", description: "Invest across 3+ categories", icon: "📈",
     check: (d) => new Set(d.money.filter((m) => m.type === "invested").map((m) => m.category)).size >= 3 },

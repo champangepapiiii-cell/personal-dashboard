@@ -104,6 +104,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   calorieTarget: 2200,
   monthlyIncome: 18000,
   savingStyle: "steady",
+  currency: "AED",
 };
 
 /** Empty-but-valid dataset: no entries, default config. */

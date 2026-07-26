@@ -7,11 +7,13 @@ import { useState } from "react";
 import { Card } from "@/components/Card";
 import { SkeletonLines } from "@/components/ui/Skeleton";
 import { newId } from "@/lib/id";
-import { aed, recurringTotal } from "@/lib/money";
+import { recurringTotal } from "@/lib/money";
+import { useMoney } from "@/lib/useMoney";
 import { useStore } from "@/lib/store-context";
 
 export function RecurringTable() {
   const { data, hydrated, addEntry, removeEntry } = useStore();
+  const { fmt, code } = useMoney();
   const [label, setLabel] = useState("");
   const [amount, setAmount] = useState("");
 
@@ -33,7 +35,7 @@ export function RecurringTable() {
         hydrated ? (
           <div className="text-right">
             <div className="text-xs text-muted">Monthly total</div>
-            <div className="text-lg font-semibold tabular-nums">{aed(total)}</div>
+            <div className="text-lg font-semibold tabular-nums">{fmt(total)}</div>
           </div>
         ) : null
       }
@@ -46,7 +48,7 @@ export function RecurringTable() {
             {data.recurring.map((r) => (
               <div key={r.id} className="flex items-center gap-3 py-2.5">
                 <span className="min-w-0 flex-1 truncate text-sm">{r.label}</span>
-                <span className="tabular-nums text-sm">{aed(r.amount)}</span>
+                <span className="tabular-nums text-sm">{fmt(r.amount)}</span>
                 <button
                   onClick={() => removeEntry("recurring", r.id)}
                   aria-label={`Delete ${r.label}`}
@@ -65,7 +67,7 @@ export function RecurringTable() {
 
           <div className="mt-2 flex items-center justify-between border-t border-border pt-3">
             <span className="text-sm font-medium">Total</span>
-            <span className="text-sm font-semibold tabular-nums">{aed(total)}</span>
+            <span className="text-sm font-semibold tabular-nums">{fmt(total)}</span>
           </div>
 
           {/* Add row */}
@@ -84,7 +86,7 @@ export function RecurringTable() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && add()}
-                placeholder="AED"
+                placeholder={code}
                 className="w-28 rounded-lg border border-border bg-surface-2 px-3 py-2 text-right text-sm tabular-nums outline-none focus:border-accent"
               />
               <button

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { dayKey } from "@/lib/dates";
 import { newId } from "@/lib/id";
+import { useMoney } from "@/lib/useMoney";
 import { useStore } from "@/lib/store-context";
 import type { ContentFormat, MoneyType, WorkoutType } from "@/lib/types";
 
@@ -35,6 +36,7 @@ export function QuickAddModal({
   onSaved: (message: string) => void;
 }) {
   const { data, addEntry, setHabitCompletion } = useStore();
+  const { code: currency } = useMoney();
   const [tab, setTab] = useState<Tab>("workout");
   // Portal target: the header's backdrop-filter would otherwise trap `fixed`.
   const [mounted, setMounted] = useState(false);
@@ -116,9 +118,9 @@ export function QuickAddModal({
         type: moneyType,
         amount: amt,
         category: category.trim() || "Uncategorised",
-        currency: "AED",
+        currency,
       });
-      onSaved(`Logged AED ${amt} ${moneyType}`);
+      onSaved(`Logged ${currency} ${amt} ${moneyType}`);
     } else if (tab === "idea") {
       const t = ideaTitle.trim();
       if (!t) return;
@@ -257,7 +259,7 @@ export function QuickAddModal({
               <Field label="Type">
                 <Segmented options={MONEY_TYPES} value={moneyType} onChange={setMoneyType} />
               </Field>
-              <Field label="Amount (AED)">
+              <Field label={`Amount (${currency})`}>
                 <input
                   type="number"
                   inputMode="decimal"

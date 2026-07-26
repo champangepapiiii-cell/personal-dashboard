@@ -6,7 +6,8 @@ export type ID = string;
 /** ISO date string. Entries use date-only ("2026-07-22"); timestamps use full ISO. */
 export type ISODate = string;
 
-export type Currency = "AED";
+/** Currency code (e.g. "AED", "USD"). See lib/currency.ts for the list. */
+export type Currency = string;
 
 // ---------------------------------------------------------------------------
 // Entry types — each has an id and an ISO date string.
@@ -129,9 +130,11 @@ export interface UserProfile {
   dietType: DietType;
   /** Daily calorie target. */
   calorieTarget: number;
-  /** Take-home income per month, in AED. */
+  /** Take-home income per month, in the chosen currency. */
   monthlyIncome: number;
   savingStyle: SavingStyle;
+  /** Currency code used for all money display (labels only — no conversion). */
+  currency: Currency;
 }
 
 export type MealSlot = "Breakfast" | "Lunch" | "Dinner";

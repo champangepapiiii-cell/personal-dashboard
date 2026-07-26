@@ -12,7 +12,8 @@ import {
 import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { aed, savedVsTarget } from "@/lib/money";
+import { savedVsTarget } from "@/lib/money";
+import { useMoney } from "@/lib/useMoney";
 import { useStore } from "@/lib/store-context";
 import { useMeasure } from "@/lib/useMeasure";
 
@@ -21,6 +22,7 @@ const CHART_H = 256;
 
 export function SavedVsTarget() {
   const { data, hydrated } = useStore();
+  const { fmt } = useMoney();
   const series = savedVsTarget(data, 6);
   const hasSaved = data.money.some((m) => m.type === "saved");
   const { ref, width } = useMeasure<HTMLDivElement>();
@@ -57,7 +59,7 @@ export function SavedVsTarget() {
                   fontSize: 13,
                 }}
                 labelStyle={{ color: "var(--muted)" }}
-                formatter={(v, name) => [aed(Number(v)), name === "saved" ? "Saved" : "Target"]}
+                formatter={(v, name) => [fmt(Number(v)), name === "saved" ? "Saved" : "Target"]}
               />
               <Legend
                 iconType="circle"

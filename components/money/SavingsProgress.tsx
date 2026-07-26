@@ -2,11 +2,13 @@
 
 import { Card } from "@/components/Card";
 import { MONTH_ABBR } from "@/lib/dates";
-import { aed, savingsProjection } from "@/lib/money";
+import { savingsProjection } from "@/lib/money";
+import { useMoney } from "@/lib/useMoney";
 import { useStore } from "@/lib/store-context";
 
 export function SavingsProgress() {
   const { data, hydrated } = useStore();
+  const { fmt } = useMoney();
   const p = savingsProjection(data);
 
   const projected =
@@ -15,7 +17,7 @@ export function SavingsProgress() {
   return (
     <Card
       title="Savings goal"
-      subtitle={`Target ${aed(p.target)}`}
+      subtitle={`Target ${fmt(p.target)}`}
       right={
         hydrated ? (
           <span
@@ -29,9 +31,9 @@ export function SavingsProgress() {
     >
       <div className="flex items-baseline gap-2">
         <span className="text-3xl font-semibold tabular-nums">
-          {hydrated ? aed(p.current) : "—"}
+          {hydrated ? fmt(p.current) : "—"}
         </span>
-        <span className="text-sm text-muted">of {aed(p.target)}</span>
+        <span className="text-sm text-muted">of {fmt(p.target)}</span>
       </div>
 
       <div className="mt-3 h-3 overflow-hidden rounded-full bg-surface-2">
@@ -48,12 +50,12 @@ export function SavingsProgress() {
           <span className="text-positive">Target reached — nice work.</span>
         ) : projected ? (
           <>
-            On track to hit <span className="font-medium text-foreground">{aed(p.target)}</span> by{" "}
+            On track to hit <span className="font-medium text-foreground">{fmt(p.target)}</span> by{" "}
             <span className="font-medium text-foreground">{projected}</span>
             {p.monthsRemaining != null && (
               <> (~{p.monthsRemaining} month{p.monthsRemaining === 1 ? "" : "s"})</>
             )}{" "}
-            at {aed(p.avgMonthly)}/mo.
+            at {fmt(p.avgMonthly)}/mo.
           </>
         ) : (
           "Add some savings to project a hit date."
