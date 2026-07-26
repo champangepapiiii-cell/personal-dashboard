@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
 import { StoreProvider } from "@/lib/store-context";
@@ -36,6 +37,7 @@ export default function RootLayout({
             <AppShell>{children}</AppShell>
           </TimeframeProvider>
         </StoreProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
