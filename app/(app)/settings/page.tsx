@@ -3,6 +3,7 @@
 import { HabitManager } from "@/components/life/HabitManager";
 import { DataControls } from "@/components/settings/DataControls";
 import { GoalsForm } from "@/components/settings/GoalsForm";
+import { SectionsManager } from "@/components/settings/SectionsManager";
 
 export default function SettingsPage() {
   return (
@@ -11,10 +12,11 @@ export default function SettingsPage() {
         <span className="h-8 w-1.5 rounded-full bg-foreground/60" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-          <p className="text-sm text-muted">Goals, habits, and your data.</p>
+          <p className="text-sm text-muted">Sections, goals, habits, and your data.</p>
         </div>
       </div>
 
+      <SectionsManager />
       <GoalsForm />
       <HabitManager />
       <DataControls />

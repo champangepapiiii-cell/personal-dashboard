@@ -49,6 +49,8 @@ function normalise(parsed: Partial<AppData> | null | undefined): AppData {
     mealPlan: parsed.mealPlan ?? base.mealPlan,
     savingsPlan: parsed.savingsPlan ?? base.savingsPlan,
     seenAchievements: parsed.seenAchievements ?? base.seenAchievements,
+    goalSections: parsed.goalSections ?? base.goalSections,
+    goalProgress: parsed.goalProgress ?? base.goalProgress,
   };
 }
 
@@ -185,6 +187,42 @@ export function markAchievementsSeen(ids: string[]): void {
   const data = getData();
   const merged = Array.from(new Set([...data.seenAchievements, ...ids]));
   persist({ ...data, seenAchievements: merged });
+}
+
+// --- Custom goal sections ---------------------------------------------------
+
+/** Create a goal section, returning it (so callers can navigate to it). */
+export function addGoalSection(title: string): AppData["goalSections"][number] | null {
+  const clean = title.trim();
+  if (!clean) return null;
+  const data = getData();
+  if (data.goalSections.some((g) => g.title.toLowerCase() === clean.toLowerCase())) {
+    return data.goalSections.find((g) => g.title.toLowerCase() === clean.toLowerCase()) ?? null;
+  }
+  const section = { id: newId("goal"), title: clean, createdAt: new Date().toISOString().slice(0, 10) };
+  persist({ ...data, goalSections: [...data.goalSections, section] });
+  return section;
+}
+
+export function removeGoalSection(id: string): void {
+  const data = getData();
+  const goalProgress = { ...data.goalProgress };
+  delete goalProgress[id];
+  persist({
+    ...data,
+    goalSections: data.goalSections.filter((g) => g.id !== id),
+    goalProgress,
+  });
+}
+
+/** Toggle a method's done state within a goal section's progress. */
+export function toggleGoalMethod(goalId: string, method: string): void {
+  const data = getData();
+  const current = data.goalProgress[goalId] ?? [];
+  const next = current.includes(method)
+    ? current.filter((m) => m !== method)
+    : [...current, method];
+  persist({ ...data, goalProgress: { ...data.goalProgress, [goalId]: next } });
 }
 
 // --- Bulk lifecycle (wired to Settings buttons) ----------------------------

@@ -1,53 +1,68 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ *
- * Theme tokens for "The System".
- * Light + dark aware. Per-domain accents drive the five sections.
+ * The System — brand tokens (The Cultural Curator).
+ * Palette: Forest #0D5C3A · Leaf #1A7A50 · Mint #E8F5EE · Sage #8BA898
+ *          Deep Forest #0A1F14 · White #FFFFFF
+ * Type: Georgia (serif) headlines · Carlito/Calibri (sans) body.
  * ------------------------------------------------------------------ */
 
 :root {
-  --background: #f6f7f8;
+  --background: #f7f9f7;
   --surface: #ffffff;
-  --surface-2: #f0f1f3;
-  --border: #e2e4e8;
-  --foreground: #14171a;
-  --muted: #616873;
+  --surface-2: #eef6f0;
+  --border: #dce8e0;
+  --foreground: #0a1f14;
+  --muted: #5e7168;
 
-  --accent: #0e7c5a;
+  --accent: #1a7a50;
   --accent-fg: #ffffff;
 
-  /* Section accents */
-  --today: #2563eb;
-  --money: #0e7c5a;
-  --body: #dc2626;
-  --life: #7c3aed;
-  --create: #d97706;
-  --coach: #0891b2;
+  /* Brand swatches */
+  --forest: #0d5c3a;
+  --leaf: #1a7a50;
+  --mint: #e8f5ee;
+  --sage: #8ba898;
+  --deep: #0a1f14;
 
-  --positive: #0e7c5a;
-  --negative: #dc2626;
+  /* Section accents (money follows the brand; others aid wayfinding) */
+  --today: #0d5c3a;
+  --money: #1a7a50;
+  --body: #c2410c;
+  --life: #7c3aed;
+  --create: #b45309;
+  --coach: #0f766e;
+
+  --positive: #1a7a50;
+  --negative: #b3261e;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b0d0f;
-    --surface: #15181c;
-    --surface-2: #1d2126;
-    --border: #2a2f36;
-    --foreground: #eef0f2;
-    --muted: #9aa2ad;
+    --background: #0a1f14;
+    --surface: #10281a;
+    --surface-2: #163322;
+    --border: #234433;
+    --foreground: #eaf3ec;
+    --muted: #8ba898;
 
-    --accent: #22c58a;
-    --accent-fg: #05130d;
+    --accent: #2f9e6a;
+    --accent-fg: #04140c;
 
-    --today: #60a5fa;
-    --money: #22c58a;
-    --body: #f87171;
+    --forest: #1a7a50;
+    --leaf: #2f9e6a;
+    --mint: #163322;
+    --sage: #8ba898;
+    --deep: #eaf3ec;
+
+    --today: #4ade80;
+    --money: #2f9e6a;
+    --body: #fb923c;
     --life: #a78bfa;
     --create: #fbbf24;
-    --coach: #22d3ee;
+    --coach: #2dd4bf;
 
-    --positive: #22c58a;
+    --positive: #2f9e6a;
     --negative: #f87171;
   }
 }
@@ -71,6 +86,12 @@
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
 
+  --color-forest: var(--forest);
+  --color-leaf: var(--leaf);
+  --color-mint: var(--mint);
+  --color-sage: var(--sage);
+  --color-deep: var(--deep);
+
   --color-today: var(--today);
   --color-money: var(--money);
   --color-body: var(--body);
@@ -81,13 +102,18 @@
   --color-positive: var(--positive);
   --color-negative: var(--negative);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-carlito), system-ui, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Headlines carry the brand's Georgia serif. */
+h1 {
+  font-family: var(--font-serif);
 }

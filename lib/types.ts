@@ -169,6 +169,16 @@ export interface SavingsPlan {
   tactics: string[];
 }
 
+/**
+ * A user-created goal that becomes its own section in the sidebar (e.g.
+ * "Confidence"). Its page content is generated from the playbook engine.
+ */
+export interface GoalSection {
+  id: ID;
+  title: string;
+  createdAt: ISODate;
+}
+
 // ---------------------------------------------------------------------------
 // The full persisted shape.
 // ---------------------------------------------------------------------------
@@ -196,6 +206,10 @@ export interface AppData {
   savingsPlan: SavingsPlan | null;
   /** Gamification: achievement ids already celebrated (so we only cheer once). */
   seenAchievements: ID[];
+  /** Custom goal sections shown in the sidebar, each with a generated playbook. */
+  goalSections: GoalSection[];
+  /** Per-goal method progress: goalSection id → list of completed method labels. */
+  goalProgress: Record<ID, string[]>;
 }
 
 /** Names of the array collections in AppData that support generic CRUD. */
@@ -207,7 +221,8 @@ export type EntryCollection =
   | "habitEntries"
   | "content"
   | "investments"
-  | "recurring";
+  | "recurring"
+  | "goalSections";
 
 /** Maps a collection name to its element type. */
 export interface EntryTypeMap {
@@ -219,4 +234,5 @@ export interface EntryTypeMap {
   content: ContentItem;
   investments: InvestmentAllocation;
   recurring: RecurringOutgoing;
+  goalSections: GoalSection;
 }

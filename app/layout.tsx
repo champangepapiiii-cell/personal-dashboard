@@ -1,24 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Carlito } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
-import { AppShell } from "@/components/AppShell";
 import { StoreProvider } from "@/lib/store-context";
 import { TimeframeProvider } from "@/lib/timeframe";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Carlito = metrics-compatible open clone of Calibri (brand body font).
+const carlito = Carlito({
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-carlito",
 });
 
 export const metadata: Metadata = {
   title: "The System",
-  description: "A personal dashboard for money, body, life, and creative output.",
+  description: "Optimise your money, body, life, and creative output — one system.",
 };
 
 export default function RootLayout({
@@ -27,15 +24,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${carlito.variable} h-full antialiased`}>
       <body className="min-h-full">
         <StoreProvider>
-          <TimeframeProvider>
-            <AppShell>{children}</AppShell>
-          </TimeframeProvider>
+          <TimeframeProvider>{children}</TimeframeProvider>
         </StoreProvider>
         <SpeedInsights />
       </body>

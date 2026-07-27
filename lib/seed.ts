@@ -129,6 +129,8 @@ export function emptyData(): AppData {
     mealPlan: null,
     savingsPlan: null,
     seenAchievements: [],
+    goalSections: [],
+    goalProgress: {},
   };
 }
 
@@ -296,5 +298,7 @@ export function generateSeedData(): AppData {
     mealPlan: null,
     savingsPlan: null,
     seenAchievements: [],
+    goalSections: [{ id: "goal_confidence", title: "Confidence", createdAt: daysAgo(20) }],
+    goalProgress: {},
   };
 }

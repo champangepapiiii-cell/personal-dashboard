@@ -33,7 +33,7 @@ const STYLES: { id: SavingStyle; label: string; blurb: string; rate: number }[] 
 ];
 
 export function OnboardingWizard({ onDone }: { onDone: () => void }) {
-  const { data, setProfile, setMealPlan, setSavingsPlan, setGoals } = useStore();
+  const { data, setProfile, setMealPlan, setSavingsPlan, setGoals, addGoalSection } = useStore();
   const [step, setStep] = useState(0);
 
   const [name, setName] = useState(data.profile.name);
@@ -89,6 +89,8 @@ export function OnboardingWizard({ onDone }: { onDone: () => void }) {
     setSavingsPlan(
       generateSavingsPlan(profile, monthlySavingsTarget, data.goals.savingsTarget),
     );
+    // Each goal written in their own words becomes its own section.
+    customGoals.forEach((g) => addGoalSection(g));
     onDone();
   };
 
